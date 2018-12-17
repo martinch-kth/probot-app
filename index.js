@@ -102,21 +102,33 @@ module.exports = app => {
     // jenkins data..........
    // console.log(req.body)
 
-    // TROR EJ de ska va här..men ..:
-      /*
+    // TROR EJ de ska va här..men ..
+    /*
+{
+  "state": "success",
+  "target_url": "https://example.com/build/status",
+  "description": "The build succeeded!",
+  "context": "continuous-integration/jenkins"
+}
+ octokit.repos.createStatus({owner, repo, sha, state, target_url, description, context})
+     */
+
     const commitComment = my_context.repo({
 
       owner: 'martinch-kth',
       repo: 'dhell',
       sha: my_context.payload.head_commit,
-      body: 'this comment was been updated by probot!'
+      description: 'this comment was been updated by probot!',
+      context:"continuous-integration/jenkins"
     })
-*/
+
 // brukar vara return (context.github.repos.createCommitComment(commitComment))
 
-    //testa..  res.send(context.github.repos.createCommitComment(commitComment))
+    //testa..
 
-    res.send('hiii---')
+    res.send(context.github.repos.createStatus(commitComment))
+
+   // res.send('hiii---')
   })
 
 }

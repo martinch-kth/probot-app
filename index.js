@@ -132,20 +132,32 @@ module.exports = app => {
  octokit.repos.createStatus({owner, repo, sha, state, target_url, description, context})
      */
 
+
     const commitComment = my_context.repo({
 
       owner: 'martinch-kth',
       repo: 'dhell',
       sha: my_context.payload.head_commit.id,
-      description: 'this comment was been updated by probot!',
+      description: 'This commit has been updated by probot!',
       context:"continuous-integration/jenkins",
-      target_url:'http://www.googl.com',
+      target_url:'http://www.mystaticpage.com',
       state: "success"
     })
 
 // brukar vara return (context.github.repos.createCommitComment(commitComment))
 
     //testa..
+
+    var fs = require('fs')
+    var createHTML = require('create-html')
+
+    var html = createHTML({
+      title: 'example'
+    })
+
+    fs.writeFile('my_index.html', html, function (err) {
+      if (err) console.log(err)
+    })
 
     res.send(my_context.github.repos.createStatus(commitComment))
 

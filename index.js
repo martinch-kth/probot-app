@@ -144,24 +144,42 @@ module.exports = app => {
       state: "success"
     })
 
-// brukar vara return (context.github.repos.createCommitComment(commitComment))
+  // brukar vara return (context.github.repos.createCommitComment(commitComment))
 
-    // http://130.237.59.170:8080/job/test/ws/target/pit-reports/
-
+    var jsonQ=require("jsonq");
     var glob = require("glob")
-
-// options is optional
-    glob("../../../../../var/lib/jenkins/workspace/test/target/pit-reports/**/*.json", options, function (er, files) {
+    
       // files is an array of filenames.
-      // If the `nonull` option is set, and nothing
-      // was found, then files is ["**/*.js"]
-      // er is an error object or null.
+    glob('../../../../../var/lib/jenkins/workspace/test/target/pit-reports/*/methods.json', function (err, files) {
+
+    if (err) {
+        console.log(err);
+    } else {
+
+        // a list of paths to javaScript files in the current working directory
+        //console.log(files);
+        var jsonfile = files.slice(-1).pop()
+
+        console.log(jsonfile)
+   
+    // nu vill jag skapa ett json object från filen.... så ja kan parsa..?
+    const fs = require('fs');
+    
+    let rawdata = fs.readFileSync(jsonfile)  
+//  let rawdata = fs.readFileSync('../../../../../var/lib/jenkins/workspace/test/target/pit-reports/201812181938/methods.json');  
+    let methodsjson = JSON.parse(rawdata);  
 
 
-      console.log("heeeeeeeeeejfrom glob")
+   // var obj = require(filepath); // no need to add the .json extension
+    var jsonQobj=jsonQ(methodsjson);
 
+    name = jsonQobj.find('name');
+ 
+    //to print list of all name
+    console.log(name.value());
 
-    })
+    }
+   });
 
 
 

@@ -146,7 +146,26 @@ module.exports = app => {
 
 // brukar vara return (context.github.repos.createCommitComment(commitComment))
 
-    //testa..
+    // http://130.237.59.170:8080/job/test/ws/target/pit-reports/
+
+    var glob = require("glob")
+
+// options is optional
+    glob("../../../../../var/lib/jenkins/workspace/test/target/pit-reports/**/*.json", options, function (er, files) {
+      // files is an array of filenames.
+      // If the `nonull` option is set, and nothing
+      // was found, then files is ["**/*.js"]
+      // er is an error object or null.
+
+
+      console.log("heeeeeeeeeejfrom glob")
+
+
+    })
+
+
+
+    //testa..funkar!!
 
     var fs = require('fs')
     var createHTML = require('create-html')

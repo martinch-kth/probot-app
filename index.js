@@ -17,11 +17,9 @@ const events = smee.start()
 // To get your app running against GitHub, see:
 // https://probot.github.io/docs/development/
 
-
+var my_context
 
 module.exports = app => {
-
-  var my_context
 
   app.log('Yay, the app was loaded!')
 
@@ -40,6 +38,27 @@ module.exports = app => {
 
       app.log('push event fired')
       app.log(context.payload)
+
+
+    const commitComment = context.repo({
+
+      owner: 'martinch-kth',
+      repo: 'dhell',
+      sha: my_context.payload.head_commit.id,
+      description: 'this comment was been updated by probot!',
+      context:'continuous-integration/jenkins',
+      target_url:'http://www.googl.com',
+      state: 'success'
+    })
+
+// brukar vara return (context.github.repos.createCommitComment(commitComment))
+
+    //testa..
+
+    return context.github.repos.createStatus(commitComment)
+
+
+
       // Post a comment on the issue
       //return context.github.issues.createComment(params)
     })
@@ -117,16 +136,18 @@ module.exports = app => {
 
       owner: 'martinch-kth',
       repo: 'dhell',
-      sha: my_context.payload.head_commit,
+      sha: my_context.payload.head_commit.id,
       description: 'this comment was been updated by probot!',
-      context:"continuous-integration/jenkins"
+      context:"continuous-integration/jenkins",
+      target_url:'http://www.googl.com',
+      state: "success"
     })
 
 // brukar vara return (context.github.repos.createCommitComment(commitComment))
 
     //testa..
 
-    res.send(context.github.repos.createStatus(commitComment))
+    res.send(my_context.github.repos.createStatus(commitComment))
 
    // res.send('hiii---')
   })

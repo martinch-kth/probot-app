@@ -160,7 +160,7 @@ module.exports = app => {
     })
 
     //   res.send(my_context.github.repos.createStatus(commitComment))
-    return context.github.repos.createStatus(commitComment)
+    return my_context.github.repos.createStatus(commitComment)
   })
 
 }

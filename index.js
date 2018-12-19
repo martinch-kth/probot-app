@@ -47,7 +47,7 @@ module.exports = app => {
       sha: my_context.payload.head_commit.id,
       description: 'this comment was been updated by probot!',
       context:'continuous-integration/jenkins',
-      target_url:'http://www.googl.com',
+      target_url:'http://130.237.59.170:3000/my_index_'+ my_context.payload.head_commit.id  +'.html',
       state: 'success'
     })
 
@@ -71,7 +71,8 @@ module.exports = app => {
 //  var urlencodedParser = bodyParser.urlencoded({ extended: false })  // create application/x-www-form-urlencoded parser
   var bodyParser = require("body-parser");
 
-  const router = app.route('/app')         // https://localhost:3000/my-app/job-f to access the endpoint.
+
+  const router = app.route('/')         // https://localhost:3000/my-app/job-f to access the endpoint.
   router.use(require('express').static('public'))
 
 //Here we are configuring express to use body-parser as middle-ware.
@@ -81,12 +82,12 @@ module.exports = app => {
 
 
   // GET method route
-  router.get('/', function (req, res) {
-    res.send('GET request to the homepage')
-  })
+ // router.get('/', function (req, res) {
+ //   res.send('GET request to the homepage')
+//  })
 
   //  router.post('/', function (req, res) {
-  router.post('/',function (req, res) {
+  router.post('/app',function (req, res) {
 
     app.log ('POOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOST')
 
@@ -130,7 +131,7 @@ module.exports = app => {
   "context": "continuous-integration/jenkins"
 }
  octokit.repos.createStatus({owner, repo, sha, state, target_url, description, context})
-     */
+     
 
 
     const commitComment = my_context.repo({
@@ -143,6 +144,9 @@ module.exports = app => {
       target_url:'http://www.mystaticpage.com',
       state: "success"
     })
+
+  var commit_id = my_context.payload.head_commit.id
+*/
 
   // brukar vara return (context.github.repos.createCommitComment(commitComment))
 
@@ -161,42 +165,89 @@ module.exports = app => {
         var jsonfile = files.slice(-1).pop()
 
         console.log(jsonfile)
-   
+
     // nu vill jag skapa ett json object från filen.... så ja kan parsa..?
     const fs = require('fs');
-    
+
     let rawdata = fs.readFileSync(jsonfile)  
-//  let rawdata = fs.readFileSync('../../../../../var/lib/jenkins/workspace/test/target/pit-reports/201812181938/methods.json');  
+//    let rawdata = fs.readFileSync('../../../../../var/lib/jenkins/workspace/test/target/pit-reports/201812181938/methods.json');  
     let methodsjson = JSON.parse(rawdata);  
 
 
    // var obj = require(filepath); // no need to add the .json extension
     var jsonQobj=jsonQ(methodsjson);
 
-    name = jsonQobj.find('name');
+    var package = jsonQobj.find('package');
+
+   // name = jsonQobj.find('name');
+
  
     //to print list of all name
-    console.log(name.value());
+   // console.log(name.value());
+
+   // methods = jsonQobj.find('methods');
+
+    //WARNING.. just a workaround for now to get amount of methods..since i cant get methods.lenght ..it gives = 1..which is true..i have to loop+count
+   // console.log(name.length);
+
+    //to partially-tested methods 
+    p_methods = jsonQobj.find('methods').find('classification');
+
+    console.log(p_methods.value())
+
+    var tested = 0;
+    var partial = 0;
+    var not_covered = 0;
+    
+
+    jsonQ.each(p_methods.value(), function (key, value) {
+        console.log(key + ' : ' + value);
+
+       if (value === 'tested')
+           tested++
+
+       if (value === 'partially-tested')
+           partial++
+
+       if (value === 'not-covered')
+           not_covered++
+    });
+
+    console.log(tested)
+    console.log(partial)
+    console.log(not_covered)
+
+    //to filter methods that are only partially tested-- fnkar inte! vetej-- kanske förman kan inte filtrera på string värden..
+    // DONT WORKS...somethingswrong..
+//    console.log(filterdHub.value());
+ //   filterdHub.each(function (index, path, value) {
+ //       console.log(value);
+ //       console.log(index);
+//        console.log(path);
+//    });
+
+    //testa..funkar!!
+
+    var createHTML = require('create-html')
+
+var html = createHTML({
+  lang: 'en',
+  dir: 'rtl',
+  head: '<meta name="description" content="example">',
+  body: '<p>Title: '+ my_context.payload.head_commit.id +'</p><p>Stats: '+ package.firstElm() +'</p><p>Tested: '+ tested +'</p><p>Partially-tested: '+ partial +'</p><p>Not-covered: '+ not_covered +'</p>'
+})
+                // + commit_id
+    fs.writeFile(__dirname + '/public/my_index_'+ my_context.payload.head_commit.id +'.html', html, function (err) {
+      if (err) console.log(err)
+    })
+
 
     }
    });
 
 
-
-    //testa..funkar!!
-
-    var fs = require('fs')
-    var createHTML = require('create-html')
-
-    var html = createHTML({
-      title: 'example'
-    })
-
-    fs.writeFile('my_index.html', html, function (err) {
-      if (err) console.log(err)
-    })
-
-    res.send(my_context.github.repos.createStatus(commitComment))
+ //FIXA ASAP->  ja de borde  vara här...inte innnan..som jag har nu ..
+ //   res.send(my_context.github.repos.createStatus(commitComment))
 
    // res.send('hiii---')
   })

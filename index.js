@@ -66,7 +66,7 @@ module.exports = app => {
   router.use(bodyParser.urlencoded({ extended: false }))
   router.use(bodyParser.json())
 
-  router.post('/app', function (req, res) {
+  router.post('/app', async function (req, res) {
 
     app.log('POST')
 

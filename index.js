@@ -73,7 +73,7 @@ module.exports = app => {
     app.log(req.body)
     console.log(req.body)
 
-    const commitComment = context.repo({
+    const commitComment = my_context.repo({
 
       owner: 'martinch-kth',
       repo: 'dhell',

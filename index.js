@@ -25,8 +25,6 @@ module.exports = app => {
 
   app.on('push', async context => {
 
-    app.log('Code was pushed to the repo, what should we do with it?')// context.log  innnan....
-
     var jenkins = require('jenkins')({ baseUrl: 'http://admin:admin@130.237.59.170:8080', crumbIssuer: true })
 
     jenkins.job.build('test', function (err, data) {
@@ -57,7 +55,7 @@ module.exports = app => {
 
 ////////////SETUP PARSING /////////////////////////////////////////////
 
-  var bodyParser = require('body-parser')
+  var bodyParser = require('body-parser').json()
 
   const router = app.route('/')
   router.use(require('express').static('public'))
@@ -66,23 +64,7 @@ module.exports = app => {
   router.use(bodyParser.urlencoded({ extended: false }))
   router.use(bodyParser.json())
 
-  router.post('/app', async function (req, res) {
-
-    app.log('POST')
-
-    app.log(req.body)
-    console.log(req.body)
-
-    const commitComment = my_context.repo({
-
-      owner: 'martinch-kth',
-      repo: 'dhell',
-      sha: my_context.payload.head_commit.id,
-      description: 'this comment was been updated by probot!',
-      context: 'continuous-integration/jenkins',
-      target_url: 'http://130.237.59.170:3000/my_index_' + my_context.payload.head_commit.id + '.html',
-      state: 'success'
-    })
+  router.post('/app', bodyParser,async function (req, res) {
 
     var jsonQ = require('jsonq')
     var glob = require('glob')
@@ -106,6 +88,10 @@ module.exports = app => {
         let methodsjson = JSON.parse(rawdata)
 
         var jsonQobj = jsonQ(methodsjson)
+
+        let jenkins_json = JSON.parse(req.body) // jenkins info...
+        var jenkinsobj = jsonQ(jenkins_json)
+        var jenkins_info = jenkinsobj.find('build').find('url').value()
 
         var package = jsonQobj.find('package')
 
@@ -151,15 +137,26 @@ module.exports = app => {
           head: '<meta name="description" content="example">',
           body: '<p>Title: ' + my_context.payload.head_commit.id + '</p><p>Stats: ' + package.firstElm() + '</p><p>Tested: ' + tested + '</p><p>Partially-tested: ' + partial + '</p><p>Not-covered: ' + not_covered + '</p>'
         })
-        // + commit_id
+
         fs.writeFile(__dirname + '/public/my_index_' + my_context.payload.head_commit.id + '.html', html, function (err) {
           if (err) console.log(err)
         })
 
+        const commitComment = my_context.repo({
+
+          owner: 'martinch-kth',
+          repo: 'dhell',
+          sha: my_context.payload.head_commit.id,
+          description: 'Jenkins info: '+ jenkins_info,
+          context: 'continuous-integration/jenkins',
+          target_url: 'http://130.237.59.170:3000/my_index_' + my_context.payload.head_commit.id + '.html',
+          state: 'success'
+        })
+
+
       }
     })
 
-    //   res.send(my_context.github.repos.createStatus(commitComment))
     return my_context.github.repos.createStatus(commitComment)
   })
 

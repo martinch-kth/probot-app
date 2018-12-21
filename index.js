@@ -128,7 +128,6 @@ module.exports = app => {
         //       console.log(index);
 //        console.log(path);
 //    });
-
         var createHTML = require('create-html')
 
         var html = createHTML({

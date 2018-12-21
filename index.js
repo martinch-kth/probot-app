@@ -91,8 +91,8 @@ module.exports = app => {
 
         let jenkins_json = JSON.parse(req.body) // jenkins info...
         var jenkinsobj = jsonQ(jenkins_json)
-        var jenkins_info = jenkinsobj.find('build').find('url').value()
-            jenkins_info.replace(/\//g, "_");// replace / with _
+        var jenkins_info = jenkinsobj.find('build').find('url').value().replace(/\//g, "_");// replace / with _
+
 
         var package = jsonQobj.find('package')
         p_methods = jsonQobj.find('methods').find('classification')

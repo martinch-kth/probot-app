@@ -74,8 +74,8 @@ module.exports = app => {
 
         var jsonQobj = jsonQ(methodsjson)
 
-      //  let jenkins_json = JSON.parse() // jenkins info...
-        var jenkinsobj = jsonQ(req.body)
+        let jenkins_json = JSON.parse(req.body) // jenkins info...
+        var jenkinsobj = jsonQ(jenkins_json)
         var jenkins_info = jenkinsobj.find('build').find('url').value().replace(/\//g, "_");// replace / with _
 
 

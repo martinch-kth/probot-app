@@ -45,7 +45,7 @@ module.exports = app => {
 
   var bodyParser = require('body-parser');
   router.use(bodyParser.json()); // support json encoded bodies
-  router.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+  router.use(bodyParser.urlencoded({ extended: false })); // support encoded bodies
 
 //  var bodyParser = require('body-parser')
 
@@ -78,8 +78,8 @@ module.exports = app => {
 
         var jsonQobj = jsonQ(methodsjson)
 
-      //  let jenkins_json = JSON.parse(req.body) // jenkins info...
-        var jenkinsobj = jsonQ(req.body)
+        let jenkins_json = JSON.stringify(req.body) // jenkins info...
+        var jenkinsobj = jsonQ(jenkins_json)
         var jenkins_info = jenkinsobj.find('build').find('url').value().replace(/\//g, "_");// replace / with _
 
 

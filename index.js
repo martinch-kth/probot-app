@@ -52,7 +52,7 @@ module.exports = app => {
 
 //
   const router = app.route('/')
- // router.use(require('express').static('public'))
+  router.use(require('express').static('public'))
 
 //  var bodyParser = require('body-parser')
   //var jsonParser = bodyParser.json() // create application/json parser

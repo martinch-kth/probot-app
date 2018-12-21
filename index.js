@@ -37,20 +37,6 @@ module.exports = app => {
     app.log('push event fired')
     app.log(context.payload)
 
-    /*
-        const commitComment = context.repo({
-
-          owner: 'martinch-kth',
-          repo: 'dhell',
-          sha: my_context.payload.head_commit.id,
-          description: 'this comment was been updated by probot!',
-          context:'continuous-integration/jenkins',
-          target_url:'http://130.237.59.170:3000/my_index_'+ my_context.payload.head_commit.id  +'.html',
-          state: 'success'
-        })
-    */
-
-    // return context.github.repos.createStatus(commitComment)
   })
 
 ////////////SETUP PARSING /////////////////////////////////////////////

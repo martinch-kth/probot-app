@@ -44,8 +44,8 @@ module.exports = app => {
   router.use(require('express').static('public'))
 
   var bodyParser = require('body-parser');
-  app.use(bodyParser.json()); // support json encoded bodies
-  app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+  router.use(bodyParser.json()); // support json encoded bodies
+  router.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 
 //  var bodyParser = require('body-parser')

@@ -40,16 +40,28 @@ module.exports = app => {
   })
 ////////////SETUP PARSING /////////////////////////////////////////////
 
-  var bodyParser = require('body-parser')
+ // var bodyParser = require('body-parser')
 
   const router = app.route('/')
   router.use(require('express').static('public'))
 
   //Here we are configuring express to use body-parser as middle-ware.
-  router.use(bodyParser.urlencoded({ extended: true }))
-  router.use(bodyParser.json())
+//  router.use(bodyParser.urlencoded({ extended: true }))
+//  router.use(bodyParser.json())
 
-  router.post('/app', bodyParser,async function (req, res) {
+
+//var express = require('express')
+var bodyParser = require('body-parser')
+
+//var app = express()
+
+// create application/json parser
+var jsonParser = bodyParser.json()
+
+// create application/x-www-form-urlencoded parser
+//var urlencodedParser = bodyParser.urlencoded({ extended: false })
+
+  router.post('/app', jsonParser,async function (req, res) {
 
     var jsonQ = require('jsonq')
     var glob = require('glob')
@@ -71,16 +83,17 @@ module.exports = app => {
 
         let rawdata = fs.readFileSync(jsonfile)
         let methodsjson = JSON.parse(rawdata)
-
         var jsonQobj = jsonQ(methodsjson)
 
-        let jenkins_json = JSON.parse(req.body) // jenkins info...
-        var jenkinsobj = jsonQ(jenkins_json)
-    //    var jenkins_info = jenkinsobj.find('build').find('url').value()
+        // jenkins parsing
+    //    let jenkins_json = JSON.stringify(req.body) // jenkins info...
+        var jenkinsobj = jsonQ(req.body)
 
+        var jenkins_all = jenkinsobj.find('build').find('url').firstElm()
 
-        var jenkins_info = jenkinsobj.find('build').find('url').value().replace(/\//g, "_");// replace / with _
-
+        var jenkins_info = jenkins_all.replace(/\//g, "_")
+        // replace / with _
+       console.log('jenk_:'+ jenkins_info)
 
         var package = jsonQobj.find('package')
         p_methods = jsonQobj.find('methods').find('classification')
@@ -125,23 +138,28 @@ module.exports = app => {
           body: '<p>Title: ' + my_context.payload.head_commit.id + '</p><p>Stats: ' + package.firstElm() + '</p><p>Tested: ' + tested + '</p><p>Partially-tested: ' + partial + '</p><p>Not-covered: ' + not_covered + '</p>'
         })
 
-        fs.writeFile(__dirname + '/public/my_index_' + my_context.payload.head_commit.id + '_'+ jenkins_info +'.html', html, function (err) {
+        fs.writeFile(__dirname + '/public/my_index_' + my_context.payload.head_commit.id +'.html', html, function (err) {
           if (err) console.log(err)
         })
+
+       console.log('id:'+my_context.payload.head_commit.id)
 
         const commitComment = my_context.repo({
 
           owner: 'martinch-kth',
           repo: 'dhell',
           sha: my_context.payload.head_commit.id,
-          description: 'Jenkins info: '+ jenkins_info,
+          description: 'Jenkins info: ',
           context: 'continuous-integration/jenkins',
-          target_url: 'http://130.237.59.170:3000/my_index_' + my_context.payload.head_commit.id +'_'+ jenkins_info +'.html',
+          target_url: 'http://130.237.59.170:3000/my_index_' + my_context.payload.head_commit.id +'.html',
           state: 'success'
         })
 
       }
     })
+
+    console.log('im ok...')
+
 
     return my_context.github.repos.createStatus(commitComment)
   })

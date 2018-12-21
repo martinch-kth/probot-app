@@ -40,8 +40,6 @@ module.exports = app => {
   })
 ////////////SETUP PARSING /////////////////////////////////////////////
 
-  var bodyParser = require('body-parser')
-
   const router = app.route('/')
   router.use(require('express').static('public'))
 

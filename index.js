@@ -92,9 +92,9 @@ module.exports = app => {
         let jenkins_json = JSON.parse(req.body) // jenkins info...
         var jenkinsobj = jsonQ(jenkins_json)
         var jenkins_info = jenkinsobj.find('build').find('url').value()
+            jenkins_info.replace(/\//g, "_");// replace / with _
 
         var package = jsonQobj.find('package')
-
         p_methods = jsonQobj.find('methods').find('classification')
 
         console.log(p_methods.value())
@@ -138,7 +138,7 @@ module.exports = app => {
           body: '<p>Title: ' + my_context.payload.head_commit.id + '</p><p>Stats: ' + package.firstElm() + '</p><p>Tested: ' + tested + '</p><p>Partially-tested: ' + partial + '</p><p>Not-covered: ' + not_covered + '</p>'
         })
 
-        fs.writeFile(__dirname + '/public/my_index_' + my_context.payload.head_commit.id + '.html', html, function (err) {
+        fs.writeFile(__dirname + '/public/my_index_' + my_context.payload.head_commit.id + '_'+ jenkins_info +'.html', html, function (err) {
           if (err) console.log(err)
         })
 
@@ -149,10 +149,9 @@ module.exports = app => {
           sha: my_context.payload.head_commit.id,
           description: 'Jenkins info: '+ jenkins_info,
           context: 'continuous-integration/jenkins',
-          target_url: 'http://130.237.59.170:3000/my_index_' + my_context.payload.head_commit.id + '.html',
+          target_url: 'http://130.237.59.170:3000/my_index_' + my_context.payload.head_commit.id +'_'+ jenkins_info +'.html',
           state: 'success'
         })
-
 
       }
     })

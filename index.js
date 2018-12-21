@@ -38,7 +38,6 @@ module.exports = app => {
     app.log(context.payload)
 
   })
-
 ////////////SETUP PARSING /////////////////////////////////////////////
 
   var bodyParser = require('body-parser').json()

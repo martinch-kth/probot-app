@@ -39,22 +39,33 @@ module.exports = app => {
 
   })
 ////////////SETUP PARSING /////////////////////////////////////////////
-
-  const router = app.route('/')
-  router.use(require('express').static('public'))
-
+  var express = require('express')
   var bodyParser = require('body-parser')
+
+  var app = express()
+
+// create application/json parser
+  var jsonParser = bodyParser.json()
+
+// create application/x-www-form-urlencoded parser
+//  var urlencodedParser = bodyParser.urlencoded({ extended: false })
+
+//
+  const router = app.route('/')
+ // router.use(require('express').static('public'))
+
+//  var bodyParser = require('body-parser')
   //var jsonParser = bodyParser.json() // create application/json parser
 
-  router.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
-  router.use(bodyParser.json()); // support json encoded bodies
+//  router.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+//  router.use(bodyParser.json()); // support json encoded bodies
 //  var bodyParser = require('body-parser')
 
   //Here we are configuring express to use body-parser as middle-ware.
 //  router.use(bodyParser.urlencoded({ extended: false }))
 //  router.use(bodyParser.json())
 
-  router.post('/app', bodyParser,async function (req, res) {
+  router.post('/app', jsonParser,async function (req, res) {
 
     var jsonQ = require('jsonq')
     var glob = require('glob')

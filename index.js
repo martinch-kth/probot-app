@@ -43,6 +43,8 @@ module.exports = app => {
   const router = app.route('/')
   router.use(require('express').static('public'))
 
+  var bodyParser = require('body-parser')
+
   //Here we are configuring express to use body-parser as middle-ware.
   router.use(bodyParser.urlencoded({ extended: false }))
   router.use(bodyParser.json())

@@ -46,7 +46,7 @@ module.exports = app => {
   router.use(require('express').static('public'))
 
   //Here we are configuring express to use body-parser as middle-ware.
-  router.use(bodyParser.urlencoded({ extended: false }))
+  router.use(bodyParser.urlencoded({ extended: true }))
   router.use(bodyParser.json())
 
   router.post('/app', bodyParser,async function (req, res) {

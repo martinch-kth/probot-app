@@ -129,7 +129,7 @@ var jsonParser = bodyParser.json()
           owner: 'martinch-kth',
           repo: 'dhell',
           sha: my_context.payload.head_commit.id,
-          description: 'Jenkins info: '+jenkins_info,
+          description: jenkins_info,
           context: 'continuous-integration/jenkins',
           target_url: 'http://130.237.59.170:3000/my_index_' + my_context.payload.head_commit.id + jenkins_info +'.html',
           state: 'success'

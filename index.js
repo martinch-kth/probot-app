@@ -136,9 +136,10 @@ var jsonParser = bodyParser.json()
           state: 'success'
         })
 
+        return my_context.github.repos.createStatus(commitstatus)
       }
     })
 
-    return my_context.github.repos.createStatus(commitstatus)
   })
+
 }

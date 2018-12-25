@@ -69,10 +69,9 @@ var jsonParser = bodyParser.json()
         // jenkins parsing
     //    let jenkins_json = JSON.stringify(req.body) // jenkins info...
         var jenkinsobj = jsonQ(req.body)
-
         var jenkins_all = jenkinsobj.find('build').find('url').firstElm()
-
         var jenkins_info = jenkins_all.replace(/\//g, "_")
+
         // replace / with _
        console.log('jenk_:'+ jenkins_info)
 
@@ -119,7 +118,7 @@ var jsonParser = bodyParser.json()
           body: '<p>Title: ' + my_context.payload.head_commit.id + '</p><p>Stats: ' + package.firstElm() + '</p><p>Tested: ' + tested + '</p><p>Partially-tested: ' + partial + '</p><p>Not-covered: ' + not_covered + '</p>'
         })
 
-        fs.writeFile(__dirname + '/public/my_index_' + my_context.payload.head_commit.id +'.html', html, function (err) {
+        fs.writeFile(__dirname + '/public/my_index_' + my_context.payload.head_commit.id + jenkins_info +'.html', html, function (err) {
           if (err) console.log(err)
         })
 
@@ -132,7 +131,7 @@ var jsonParser = bodyParser.json()
           sha: my_context.payload.head_commit.id,
           description: 'Jenkins info: ',
           context: 'continuous-integration/jenkins',
-          target_url: 'http://130.237.59.170:3000/my_index_' + my_context.payload.head_commit.id +'.html',
+          target_url: 'http://130.237.59.170:3000/my_index_' + my_context.payload.head_commit.id + jenkins_info +'.html',
           state: 'success'
         })
 

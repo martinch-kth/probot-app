@@ -1,22 +1,3 @@
-/*
-const SmeeClient = require('smee-client')
-
-const smee = new SmeeClient({
-  source: 'https://smee.io/sdfasdf',
-  target: 'http://localhost:3000/events',
-  logger: console
-})
-
-const events = smee.start()
-
-*/
-
-// For more information on building apps:
-// https://probot.github.io/docs/
-
-// To get your app running against GitHub, see:
-// https://probot.github.io/docs/development/
-
 var my_context
 
 module.exports = app => {
@@ -144,7 +125,7 @@ var jsonParser = bodyParser.json()
 
        console.log('id:'+my_context.payload.head_commit.id)
 
-        const commitComment = my_context.repo({
+        const commitstatus = my_context.repo({
 
           owner: 'martinch-kth',
           repo: 'dhell',
@@ -158,10 +139,6 @@ var jsonParser = bodyParser.json()
       }
     })
 
-    console.log('im ok...')
-
-
-    return my_context.github.repos.createStatus(commitComment)
+    return my_context.github.repos.createStatus(commitstatus)
   })
-
 }

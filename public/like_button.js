@@ -5,6 +5,5 @@ class Greeting extends React.Component {
 }
 
 ReactDOM.render(
-<Greeting />,
-  document.getElementById('root')
+<Greeting />, document.getElementById('root')
 );

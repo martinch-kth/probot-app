@@ -6,5 +6,5 @@ class Greeting extends React.Component {
 
 ReactDOM.render(
 <Greeting />,
-  document.getElementById('like_button_container')
+  document.getElementById('root')
 );

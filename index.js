@@ -68,12 +68,18 @@ var jsonParser = bodyParser.json()
 
         // jenkins parsing
     //    let jenkins_json = JSON.stringify(req.body) // jenkins info...
+        console.log(req.body)
+
         var jenkinsobj = jsonQ(req.body)
+
+        var jenkins_status = jenkinsobj.find('build').find('status').firstElm().toLowerCase();
+
         var jenkins_all = jenkinsobj.find('build').find('url').firstElm()
         var jenkins_info = jenkins_all.replace(/\//g, "_")
 
         // replace / with _
        console.log('jenk_:'+ jenkins_info)
+       console.log('jenk_status:'+ jenkins_status)
 
         var package = jsonQobj.find('package')
         p_methods = jsonQobj.find('methods').find('classification')
@@ -115,7 +121,7 @@ var jsonParser = bodyParser.json()
           lang: 'en',
           dir: 'rtl',
           head: '<meta name="description" content="example">',
-          body: '<p>Commit ID: ' + my_context.payload.head_commit.id + '</p><p>Package: ' + package.firstElm() + '</p><p>Tested: ' + tested + '</p><p>Partially-tested: ' + partial + '</p><p>Not-covered: ' + not_covered + '</p>'
+          body: '<p>Commit ID: ' + my_context.payload.head_commit.id + '</p><p>Package: ' + package.firstElm() + '</p><p>Tested: ' + tested + '</p><p>Partially-tested: ' + partial + '</p><p>Not-covered: ' + not_covered + '</p>' + '<div id="like_button_container"></div><script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script><script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script><script src="../like_button.js"></script>'
         })
 
         fs.writeFile(__dirname + '/public/my_index_' + my_context.payload.head_commit.id + jenkins_info +'.html', html, function (err) {
@@ -130,9 +136,9 @@ var jsonParser = bodyParser.json()
           repo: 'dhell',
           sha: my_context.payload.head_commit.id,
           description: jenkins_info,
-          context: 'continuous-integration/jenkins',
+          context: 'CI/jenkins',
           target_url: 'http://130.237.59.170:3000/my_index_' + my_context.payload.head_commit.id + jenkins_info +'.html',
-          state: 'success'
+          state: jenkins_status
         })
 
         return my_context.github.repos.createStatus(commitstatus)

@@ -1,9 +1,41 @@
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://127.0.0.1/commits');
+
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  // we're connected!
+  console.log('db connected...')
+
+});
+
+// db.commitcollection.insert({ "commit_id" : "12345","package_id" : "123","tested" : "123","partially-tested" : "123","not_covered" : "123", "methodsfilename" : "12345" })
+var kittySchema = new mongoose.Schema({
+  commit_id: String, package_id: String, tested: String, partially_tested: String, not_covered: String,methods_filename: String
+});
+
+
+var Kitten = mongoose.model('Kitten', kittySchema);
+
+
+
+//Kitten.find(function (err, kittens) {
+//  if (err) return console.error(err);
+//  console.log(kittens);
+//})
+
+
+//Kitten.find({ name: /^fluff/ }, callback);
+
+
 var my_context
 
 module.exports = app => {
 
   app.log('Yay, the app was loaded!')
 
+
+// Github sends PAYLOAD 
   app.on('push', async context => {
 
     var jenkins = require('jenkins')({ baseUrl: 'http://admin:admin@130.237.59.170:8080', crumbIssuer: true })
@@ -19,36 +51,65 @@ module.exports = app => {
     app.log(context.payload)
 
   })
-////////////SETUP PARSING /////////////////////////////////////////////
 
- // var bodyParser = require('body-parser')
-
+// post back to GitHUB  
   const router = app.route('/')
   router.use(require('express').static('public'))
 
-  //Here we are configuring express to use body-parser as middle-ware.
-//  router.use(bodyParser.urlencoded({ extended: true }))
-//  router.use(bodyParser.json())
+  //var express = require('express')
+  var bodyParser = require('body-parser')
+
+  // create application/json parser
+  var jsonParser = bodyParser.json()
+
+//------------------
+router.get('/commitinfo/:tagId', function(req, res) {
 
 
-//var express = require('express')
-var bodyParser = require('body-parser')
+var createHTML = require('create-html')
 
-//var app = express()
+console.log('paramter in is: '+ req.params.tagId)
 
-// create application/json parser
-var jsonParser = bodyParser.json()
+//var silence = new Kitten({ commit_id: my_context.payload.head_commit.id, package_id: package.firstElm(), tested: tested, partially_tested: partial, not_covered: not_covered$
 
-// create application/x-www-form-urlencoded parser
-//var urlencodedParser = bodyParser.urlencoded({ extended: false })
+var query  = Kitten.where({ commit_id: req.params.tagId });
 
+query.findOne(function (err, kitten) {
+  if (err) return handleError(err);
+  if (kitten) {
+    // doc may be null if no document matched
+    console.log('hittade katten...')
+
+    var html = createHTML({
+        lang: 'en',
+        dir: 'rtl',
+        head: '<meta name="description" content="example">',
+        body: '<p>Commit ID: ' + kitten.commit_id + '</p><p>Package: ' + kitten.package_id + '</p><p>Tested: ' + kitten.tested + '</p><p>Partially-tested: ' +kitten.partially_tested + '</p><p> Not-covered: ' + kitten.not_covered + '</p>'
+    })
+
+  res.send(html);
+
+  }
+});
+
+//var silence = new Kitten({ commit_id: my_context.payload.head_commit.id, package_id: package.firstElm(), tested: tested, partially_tested: partial, not_covered: not_covered$
+
+//  res.send(html);
+});
+
+
+// GET /p/5
+// tagId is set to 5
+
+
+//----------------------
   router.post('/app', jsonParser,async function (req, res) {
 
     var jsonQ = require('jsonq')
     var glob = require('glob')
 
     // files is an array of filenames.
-    glob('../../../../../var/lib/jenkins/workspace/test/target/pit-reports/*/methods.json', function (err, files) {
+    glob("../../../../../var/lib/jenkins/workspace/test/target/pit-reports/*/methods.json", function (err, files) {
 
       if (err) {
         console.log(err)
@@ -102,31 +163,33 @@ var jsonParser = bodyParser.json()
           if (value === 'not-covered')
             not_covered++
         })
-
         console.log(tested)
         console.log(partial)
         console.log(not_covered)
 
         //to filter methods that are only partially tested-- fnkar inte! vetej-- kanske förman kan inte filtrera på string värden..
-        // DONT WORKS...somethingswrong..
-//    console.log(filterdHub.value());
-        //   filterdHub.each(function (index, path, value) {
-        //       console.log(value);
-        //       console.log(index);
-//        console.log(path);
-//    });
-        var createHTML = require('create-html')
+      
+//        var createHTML = require('create-html')
 
-        var html = createHTML({
-          lang: 'en',
-          dir: 'rtl',
-          head: '<meta name="description" content="example">',
-          body: '<p>Commit ID: ' + my_context.payload.head_commit.id + '</p><p>Package: ' + package.firstElm() + '</p><p>Tested: ' + tested + '</p><p>Partially-tested: ' + partial + '</p><p>Not-covered: ' + not_covered + '</p>' + '<div id="root"></div><script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script><script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script><script src="../like_button.js"></script><script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>'
-        })
+//        var html = createHTML({
+//          lang: 'en',
+//          dir: 'rtl',
+//          head: '<meta name="description" content="example">',
+//          body: '<p>Commit ID: ' + my_context.payload.head_commit.id + '</p><p>Package: ' + package.firstElm() + '</p><p>Tested: ' + tested + '</p><p>Partially-tested: ' + $
+//        })
 
-        fs.writeFile(__dirname + '/public/my_index_' + my_context.payload.head_commit.id + jenkins_info +'.html', html, function (err) {
-          if (err) console.log(err)
-        })
+//        fs.writeFile(__dirname + '/public/my_index_' + my_context.payload.head_commit.id + jenkins_info +'.html', html, function (err) {
+//          if (err) console.log(err)
+//        })
+
+
+// commit_id: String, package_id: String, tested: String, partially_tested: String, not_covered: String,methods_filename: String
+
+var silence = new Kitten({ commit_id: my_context.payload.head_commit.id, package_id: package.firstElm(), tested: tested, partially_tested: partial, not_covered: not_covered,methods_filename: "some_methods.json" });
+
+  silence.save(function (err, fluffy) {
+    if (err) return console.error(err);
+  });
 
        console.log('id:'+my_context.payload.head_commit.id)
 
@@ -137,14 +200,29 @@ var jsonParser = bodyParser.json()
           sha: my_context.payload.head_commit.id,
           description: jenkins_info,
           context: 'CI/jenkins',
-          target_url: 'http://130.237.59.170:3000/my_index_' + my_context.payload.head_commit.id + jenkins_info +'.html',
+          target_url: 'http://130.237.59.170:3000/commitinfo/' + my_context.payload.head_commit.id ,
           state: jenkins_status
         })
 
         return my_context.github.repos.createStatus(commitstatus)
       }
     })
-
   })
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

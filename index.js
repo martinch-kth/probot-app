@@ -141,7 +141,8 @@ module.exports = app => {
                         "name": obj,
                         "tested": 0,
                         "notcovered": 0,
-                        "partiallytested": 0
+                        "partiallytested": 0,
+                        "links": []
                     };
 
                     array_all.push(jsonObj_child)
@@ -166,7 +167,16 @@ module.exports = app => {
                             }
                             if (obj.classification === 'partially-tested' )
                             {
-                                entry.partiallytested = entry.partiallytested + 1
+                               entry.partiallytested = entry.partiallytested + 1
+                
+                               var linkstring = "link " + entry.partiallytested
+
+                               var link = "https://github.com/martinch-kth/commons-codec/tree/trunk/src/main/java/"+ obj.package +"/"+ obj['file-name'] +"#L"+ obj['line-number']
+
+                               var myObj = {[linkstring]: link};
+                
+                               entry.links.push(myObj);
+                               //   "linkstring" : "https://github.com/" //+ owner + "/"+ repo + "/blob/{commit}/src/main/java/{method.package}/{filename}#L{linenumber}"
                             }
                             if (obj.classification === 'not-covered' )
                             {
@@ -181,38 +191,70 @@ module.exports = app => {
                 });
 
                 var treemap='{"name":"Mutation test","color":"hsl(187, 70%, 50%)","children":['
+                var result= '{'
 
                 array_all.forEach(function(i, idx, array){
+
+                    var result_package = '"package ' + String(idx)+ '": "' + String(i.name) + '  Tested: ' + String(i.tested) + '  Partially tested: ' + String(i.partiallytested) + '  Not covered: ' + String(i.notcovered) + '",'
+                                       + '"Partially-tested '+ String(idx) +'" : ' + JSON.stringify(i.links)
+
 
                     var pacpac='{"name":"' + String(i.name) +'","color":"hsl(87, 70%, 50%)","children":[' +
 
                         '{"name": "Tested",' +
-                        '"color":"hsl(299, 70%, 50%)",' +
+                        '"color":"hsl(99, 98%, 51%)",' +
                         '"loc":' + i.tested +
                         '},{"name":"Partially tested",' +
-                        '"color": "hsl(143, 70%, 50%)",' +
+                        '"color": "hsl(53, 100%, 50%)",' +
                         '"loc": ' + i.partiallytested +
                         '},{"name": "Not covered",' +
-                        '"color": "hsl(12, 70%, 50%)",' +
+                        '"color": "hsl(348, 100%, 50%)",' + 
                         '\"loc\": ' + i.notcovered
 
                     var tail= '}]},'
                     var last_tail= '}]}'
 
+                    var result_tail= ','
 
                     if (idx === array.length - 1){
                         console.log("Last callback call at index " + idx + " with value " + i );
                         treemap = treemap + pacpac + last_tail
-
-                    }else {
+                        result = result + result_package
+                    }
+                    else
+                    {
                         treemap = treemap + pacpac + tail
+                        result = result + result_package + result_tail
                     }
                 });
 
 
                 var close_tree = ']}'
+		var close_result = '}'
 
-                treemap = treemap + close_tree
+		treemap = treemap + close_tree
+		result = result + close_result
+
+///// JUST CHECKING ////////////////////////////////////////
+var isJSON = require('is-valid-json');
+
+// "obj" can be {},{"foo":"bar"},2,"2",true,false,null,undefined, etc.
+// var obj = "any JS literal here";
+
+if( isJSON(result) ){
+
+    // Valid JSON, do something
+    console.log(result)
+}
+else{
+
+    // not a valid JSON, show friendly error message
+    console.log("not valid JSOOOOOOON")
+
+    console.log(result)
+}
+
+
 
 ///////////////////////////////////////////////////////////////////7
                 
@@ -233,7 +275,7 @@ module.exports = app => {
 
 
 //                var stat = new Stats({ commit_id: my_context.payload.head_commit.id, package_id: package.firstElm(), tested: tested, partially_tested: partial, not_covered: not_covered, url_link: my_context.payload.head_commit.url ,treemap : treemap });
-                var stat = new Stats({ commit_id: my_context.payload.head_commit.id, package_id: 'hej', tested: 3, partially_tested: 3, not_covered: 3, url_link: my_context.payload.head_commit.url ,treemap : treemap });
+                var stat = new Stats({ commit_id: my_context.payload.head_commit.id, package_id: result, tested: 3, partially_tested: 3, not_covered: 3, url_link: my_context.payload.head_commit.url ,treemap : treemap });
 
 
 

@@ -10,9 +10,16 @@ db.once('open', function() {
 });
 
 // db.commitcollection.insert({ "commit_id" : "12345","package_id" : "123","tested" : "123","partially-tested" : "123","not_covered" : "123", "methodsfilename" : "12345" })
+
+//var statsSchema = new mongoose.Schema({
+//    commit_id: String, package_id: String, tested: String, partially_tested: String, not_covered: String, url_link: String, treemap : String
+//});
+
+
 var statsSchema = new mongoose.Schema({
-    commit_id: String, package_id: String, tested: String, partially_tested: String, not_covered: String, url_link: String, treemap : String
+    commit_id:String, date: { type: Date, default: Date.now }, username:String, repository:String,packages_partially_tested: String,commit_url: String, treemap : String, descartes_results: String
 });
+
 
 var Stats = mongoose.model('Stats',statsSchema);
 
@@ -50,43 +57,6 @@ module.exports = app => {
     // create application/json parser
     var jsonParser = bodyParser.json()
 
-//------------------ DET HÄR SKA inTE H*NDA här mer.. vi ska bara spara undan till DB..
-
-    /*
-    router.get('/commitinfo/:tagId', function(req, res) {
-
-
-    var createHTML = require('create-html')
-
-    console.log('paramter in is: '+ req.params.tagId)
-
-    //var silence = new Kitten({ commit_id: my_context.payload.head_commit.id, package_id: package.firstElm(), tested: tested, partially_tested: partial, not_covered: not_covered$
-
-    var query  = Stats.where({ commit_id: req.params.tagId });
-
-    query.findOne(function (err, stats) {
-      if (err) return handleError(err);
-      if (stats) {
-        // doc may be null if no document matched
-        console.log('hittade...')
-
-        var html = createHTML({
-            lang: 'en',
-            dir: 'rtl',
-            head: '<meta name="description" content="example">',
-            body: '<p>Commit ID: ' + stats.commit_id + '</p><p>Package: ' + stats.package_id + '</p><p>Tested: ' + stats.tested + '</p><p>Partially-tested: ' + stats.partially_tested + '</p><p> Not-covered: ' + stats.not_covered + '</p>'
-        })
-
-      res.send(html);
-
-      }
-     });
-    });
-
-    */
-
-//_________________
-
     router.post('/app', jsonParser,async function (req, res) {
 
         var jsonQ = require('jsonq')
@@ -104,11 +74,8 @@ module.exports = app => {
 
                 console.log(jsonfile)
 
-// skriva metoder som.. läser från fil.. .json...
-////////////////////////////////////////////////////////////////////////
-  //              var jsonfile = "methods.json"
-
-// nu vill jag skapa ett json object från filen.... så ja kan parsa..
+// skriva metoder som.. läser från fil. 
+///////////////////////////////////////
                 const fs = require('fs')
 
                 let rawdata = fs.readFileSync(jsonfile)
@@ -168,7 +135,8 @@ module.exports = app => {
                             if (obj.classification === 'partially-tested' )
                             {
                                entry.partiallytested = entry.partiallytested + 1
-                
+
+                               // add link to some..
                                var linkstring = "link " + entry.partiallytested
 
                                var link = "https://github.com/martinch-kth/commons-codec/tree/trunk/src/main/java/"+ obj.package +"/"+ obj['file-name'] +"#L"+ obj['line-number']
@@ -189,15 +157,17 @@ module.exports = app => {
                 array_all.forEach(function(entry) {
                     console.log(entry);
                 });
+                  
+                var packages_partially_tested = '{'
 
                 var treemap='{"name":"Mutation test","color":"hsl(187, 70%, 50%)","children":['
                 var result= '{'
 
                 array_all.forEach(function(i, idx, array){
 
-                    var result_package = '"package ' + String(idx)+ '": "' + String(i.name) + '  Tested: ' + String(i.tested) + '  Partially tested: ' + String(i.partiallytested) + '  Not covered: ' + String(i.notcovered) + '",'
-                                       + '"Partially-tested '+ String(idx) +'" : ' + JSON.stringify(i.links)
-
+                    var result_package = '"package ' + String(idx)+ '": "' + String(i.name) + '  Tested: ' + String(i.tested) + '  Partially tested: ' + String(i.partiallytested) + '  Not covered: ' + String(i.notcovered) + '"'
+                    
+                    var result_partially_tested = '"'+ String(i.name) +'" : ' + JSON.stringify(i.links) 
 
                     var pacpac='{"name":"' + String(i.name) +'","color":"hsl(87, 70%, 50%)","children":[' +
 
@@ -220,11 +190,15 @@ module.exports = app => {
                         console.log("Last callback call at index " + idx + " with value " + i );
                         treemap = treemap + pacpac + last_tail
                         result = result + result_package
+                                                   
+                        packages_partially_tested = packages_partially_tested + result_partially_tested 
                     }
                     else
                     {
                         treemap = treemap + pacpac + tail
                         result = result + result_package + result_tail
+                                                  
+                        packages_partially_tested = packages_partially_tested + result_partially_tested + result_tail 
                     }
                 });
 
@@ -234,6 +208,8 @@ module.exports = app => {
 
 		treemap = treemap + close_tree
 		result = result + close_result
+
+                packages_partially_tested = packages_partially_tested + close_result 
 
 ///// JUST CHECKING ////////////////////////////////////////
 var isJSON = require('is-valid-json');
@@ -273,12 +249,7 @@ else{
                 console.log('jenk_:'+ jenkins_info)
                 console.log('jenk_status:'+ jenkins_status)
 
-
-//                var stat = new Stats({ commit_id: my_context.payload.head_commit.id, package_id: package.firstElm(), tested: tested, partially_tested: partial, not_covered: not_covered, url_link: my_context.payload.head_commit.url ,treemap : treemap });
-                var stat = new Stats({ commit_id: my_context.payload.head_commit.id, package_id: result, tested: 3, partially_tested: 3, not_covered: 3, url_link: my_context.payload.head_commit.url ,treemap : treemap });
-
-
-
+                var stat = new Stats({ commit_id: my_context.payload.head_commit.id, date: new Date,username: "martinch-kth",repository:"commons", packages_partially_tested: packages_partially_tested , commit_url: my_context.payload.head_commit.url ,treemap : treemap, descartes_results: "vet-ej-vad" });
 
                 stat.save(function (err, somestat) {
                     if (err) return console.error(err);
